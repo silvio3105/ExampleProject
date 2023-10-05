@@ -1,0 +1,344 @@
+
+######################################
+# BUILD CONFIG
+######################################
+
+# RELEASE BUILD
+RELEASE = 0
+
+# OPT FLAG FOR SIZE
+SIZE = 0
+
+# LAST LINE OF DEFENCE IN CASE OF ROM SHORTAGE
+FLTO = 0
+
+# USE -g3 FLAG IN NON RELEASE BUILD
+USE_G3 = 0
+
+# SET TO 1 TO BUILD WITH RTX5
+RTX = 1
+
+# USE G++ INSTEAD OF GCC
+GPP = 0
+
+# PRINT GCC VERSION AFTER BUILD
+PRINT_VER = 0
+
+# GENERATE STACK ANALYSIS FILE FOR EACH TRANSLATION UNIT
+STACK_ANALYSIS = 0
+
+# WARN IF STACKOVERFLOW MIGHT HAPPEND. SET TO 0 TO DISABLE WARNING
+STACK_OVERFLOW = 256
+
+# GENERATE RUNTIME TYPE IDENTIFICATION INFORMATION
+RTTI = 0
+
+# CATCH EXCEPTIONS
+EXCEPTIONS = 0
+
+# USE DEFAULT LIB
+DEF_LIB = 0
+
+
+######################################
+# HARDWARE-RELATED CONFIG
+######################################
+
+# BUILD FOR HARDWARE VERSION
+HW_VER = HW_Template
+
+# CHIP (FOR J-LINK)
+CHIP = STM32F103C8
+
+# COMPILER DEFINE FOR MCU
+MCU_DEFINE = STM32F103xB
+
+# START ADDRESS FOR .bin FILE
+ADDR = 0x08000000
+
+# CPU CORE
+CPU_CORE = cortex-m3
+
+# LINKER SCRIPT FILE
+LDSCRIPT = STM32F103XB_FLASH.ld
+
+# MCU STARTUP FILE
+STARTUP = startup_stm32f103xb.s
+
+# RTX5 SYSTEM FILE
+RTX_SYS_FILE = stm32f103xb.h
+
+# RTX5 IRQ FILE
+RTX_IRQ_FILE = irq_armv7m.s
+
+
+######################################
+# MISC CONFIG
+######################################
+
+# JLINK SCRIPT NAMES
+FLASH_SCRIPT = JLink_Flash_$(HW_VER).jlink
+ERASE_SCRIPT = JLink_Erase_$(HW_VER).jlink
+
+# FOLDER WITH JLINK SCRIPTS
+JLINK_FOLDER = .jlink
+
+# BUILD FOLDER
+BUILD_FOLDER = .builds\$(HW_VER)
+
+# TOOLCHAIN PREFIX
+TC_PREFIX = arm-none-eabi-
+
+# MAKEFILE FILE NAME
+MAKEFILE = Make/$(HW_VER)
+
+
+######################################
+# TRANSLATION UNITS
+######################################
+
+# C UNITS
+C_SOURCES = \
+MCU/system_stm32f1xx.c \
+Drivers/STM32F1/stm32f1xx_hal_gpio_ex.c \
+Drivers/STM32F1/stm32f1xx_hal_tim.c \
+Drivers/STM32F1/stm32f1xx_hal_tim_ex.c \
+Drivers/STM32F1/stm32f1xx_hal_uart.c \
+Drivers/STM32F1/stm32f1xx_hal.c \
+Drivers/STM32F1/stm32f1xx_hal_rcc.c \
+Drivers/STM32F1/stm32f1xx_hal_rcc_ex.c \
+Drivers/STM32F1/stm32f1xx_hal_gpio.c \
+Drivers/STM32F1/stm32f1xx_hal_dma.c \
+Drivers/STM32F1/stm32f1xx_hal_cortex.c \
+Drivers/STM32F1/stm32f1xx_hal_pwr.c \
+Drivers/STM32F1/stm32f1xx_hal_flash.c \
+Drivers/STM32F1/stm32f1xx_hal_flash_ex.c \
+Drivers/STM32F1/stm32f1xx_hal_exti.c \
+
+
+# C++ UNITS
+CPP_SOURCES =  \
+Main.cpp \
+
+
+# ASSEMBLER UNITS
+AS_SOURCES =  \
+MCU/$(STARTUP) \
+
+
+######################################
+# INCLUDE PATHS
+######################################
+
+# INCLUDE DIRECTORIES
+INCLUDE_PATHS =  \
+-I. \
+-IConfig \
+-IApplication/Inc \
+-ILibraries/Inc \
+-ICMSIS/Core \
+-IMCU/Inc \
+-IDrivers/STM32F1/Inc \
+
+
+######################################
+# DEFINES
+######################################
+
+# DEFINES
+DEFINES =  \
+-DHW_$(HW_VER) \
+-D$(MCU_DEFINE) \
+-DUSE_HAL_DRIVER \
+
+
+######################################
+# RTX5 STUFF
+######################################
+
+ifeq ($(RTX), 1)
+C_SOURCES += \
+CMSIS/RTX/RTX_Config.c \
+CMSIS/RTX/os_systick.c \
+CMSIS/RTX/rtx_delay.c \
+CMSIS/RTX/rtx_evflags.c \
+CMSIS/RTX/rtx_evr.c \
+CMSIS/RTX/rtx_kernel.c \
+CMSIS/RTX/rtx_memory.c \
+CMSIS/RTX/rtx_mempool.c \
+CMSIS/RTX/rtx_msgqueue.c \
+CMSIS/RTX/rtx_mutex.c \
+CMSIS/RTX/rtx_semaphore.c \
+CMSIS/RTX/rtx_system.c \
+CMSIS/RTX/rtx_thread.c \
+CMSIS/RTX/rtx_timer.c \
+CMSIS/RTX/rtx_lib.c
+
+
+CPP_SOURCES += \
+
+
+
+INCLUDE_PATHS += \
+-ICMSIS/RTX/Inc \
+-IApplication/Tasks/Inc \
+
+
+AS_SOURCES += \
+CMSIS/RTX/IRQ/$(RTX_IRQ_FILE)
+
+
+DEFINES += \
+-DUSING_RTX \
+-DCMSIS_device_header=\"$(RTX_SYS_FILE)\"
+
+endif
+
+
+#######################################
+# OPTIMIZATION
+#######################################
+
+ifeq ($(RELEASE), 0)
+DEFINES += -DDEBUG
+OPT += -Og
+else ifeq ($(SIZE), 1)
+OPT += -Os
+else
+OPT += -Ofast
+endif
+
+ifeq ($(RELEASE), 0)
+ifeq ($(USE_G3), 1)
+COMPILER_FLAGS += -g3
+else
+COMPILER_FLAGS += -g
+endif
+COMPILER_FLAGS += -gdwarf-2
+else ifeq ($(FLTO), 1)
+COMPILER_FLAGS += -flto
+endif
+
+
+#######################################
+# TOOLCHAIN
+#######################################
+
+ifeq ($(GPP), 1)
+CC = $(TC_PREFIX)g++
+AS = $(TC_PREFIX)g++
+else
+CC = $(TC_PREFIX)gcc
+AS = $(TC_PREFIX)gcc -x assembler-with-cpp
+endif
+CP = $(TC_PREFIX)objcopy
+SZ = $(TC_PREFIX)size
+HEX = $(CP) -O ihex
+BIN = $(CP) -O binary -S
+ 
+
+#######################################
+# BUILD FLAGS
+#######################################
+
+CAL_FLAGS = -mcpu=$(CPU_CORE) -mthumb $(FPU) $(FLOAT-ABI)
+COMPILER_FLAGS += $(CAL_FLAGS) $(DEFINES) $(INCLUDE_PATHS) $(OPT) -MMD -MP -MF"$(@:%.o=%.d)" -Wall -Wdouble-promotion -Wshadow -Wformat=2 -Wformat-overflow -Wformat-truncation -fdata-sections -ffunction-sections
+LINKER_FLAGS = $(CAL_FLAGS) -specs=nano.specs -TLinker/$(LDSCRIPT) -lc -lm -lnosys -Wl,-Map=$(BUILD_FOLDER)/$(HW_VER).map,--cref,--gc-sections,--print-memory-usage
+
+ifeq ($(GPP), 1)
+ifeq ($(RTTI), 0)
+COMPILER_FLAGS += -fno-rtti
+endif
+endif
+
+ifeq ($(EXCEPTIONS), 0)
+COMPILER_FLAGS += -fno-exceptions
+endif
+
+ifeq ($(DEF_LIB), 0)
+COMPILER_FLAGS += -nodefaultlibs
+endif
+
+ifeq ($(STACK_ANALYSIS), 1)
+COMPILER_FLAGS += -fstack-usage
+endif
+
+ifneq ($(STACK_OVERFLOW), 0)
+COMPILER_FLAGS += -Wstack-usage=$(STACK_OVERFLOW)
+endif
+
+
+#######################################
+# BUILD
+#######################################
+
+all: $(BUILD_FOLDER)/$(HW_VER).elf $(BUILD_FOLDER)/$(HW_VER).hex $(BUILD_FOLDER)/$(HW_VER).bin
+
+# LIST OF C OBJECTS
+OBJECTS = $(addprefix $(BUILD_FOLDER)/,$(notdir $(C_SOURCES:.c=.o)))
+vpath %.c $(sort $(dir $(C_SOURCES)))
+
+# LIST OF C++ OBJECTS
+OBJECTS_CPP = $(addprefix $(BUILD_FOLDER)/,$(notdir $(CPP_SOURCES:.cpp=.o)))
+vpath %.cpp $(sort $(dir $(CPP_SOURCES)))
+
+# LIST OF ASM OBJECTS
+OBJECTS += $(addprefix $(BUILD_FOLDER)/,$(notdir $(AS_SOURCES:.s=.o)))
+vpath %.s $(sort $(dir $(AS_SOURCES)))
+
+$(BUILD_FOLDER)/%.o: %.c $(MAKEFILE) | $(BUILD_FOLDER) 
+	$(CC) -c $(COMPILER_FLAGS) -Wa,-a,-ad,-alms=$(BUILD_FOLDER)/$(notdir $(<:.c=.lst)) $< -o $@
+
+$(BUILD_FOLDER)/%.o: %.cpp $(MAKEFILE) | $(BUILD_FOLDER) 
+	$(CC) -c $(COMPILER_FLAGS) -Wa,-a,-ad,-alms=$(BUILD_FOLDER)/$(notdir $(<:.cpp=.lst)) $< -o $@
+
+$(BUILD_FOLDER)/%.o: %.s $(MAKEFILE) | $(BUILD_FOLDER)
+	$(AS) -c $(COMPILER_FLAGS) $< -o $@
+
+$(BUILD_FOLDER)/$(HW_VER).elf: $(OBJECTS) $(OBJECTS_CPP) $(MAKEFILE)
+	$(CC) $(OBJECTS) $(OBJECTS_CPP) $(LINKER_FLAGS) -o $@
+
+$(BUILD_FOLDER)/%.hex: $(BUILD_FOLDER)/%.elf | $(BUILD_FOLDER)
+	$(HEX) $< $@
+	
+$(BUILD_FOLDER)/%.bin: $(BUILD_FOLDER)/%.elf | $(BUILD_FOLDER)
+	$(BIN) $< $@
+
+ifeq ($(PRINT_VER), 1)
+	$(CC) --version
+endif	
+	
+$(BUILD_FOLDER):
+	mkdir $@
+
+
+#######################################
+# FLASH CHIP
+#######################################
+
+flash: all
+	if not exist $(JLINK_FOLDER)/$(FLASH_SCRIPT) (echo Creating flash script & (echo r& echo h& echo loadbin $(BUILD_FOLDER)/$(HW_VER).bin,$(ADDR)& echo verifybin $(BUILD_FOLDER)/$(HW_VER).bin,$(ADDR)& echo r& echo q) > $(JLINK_FOLDER)/$(FLASH_SCRIPT)) else (echo Flash script exists) 
+	JLink.exe -device $(CHIP) -if SWD -speed 4000 -autoconnect 1 -CommandFile $(JLINK_FOLDER)/$(FLASH_SCRIPT)
+	
+
+#######################################
+# ERASE CHIP FLASH MEMORY
+#######################################		
+
+erase:
+	if not exist $(JLINK_FOLDER)/$(ERASE_SCRIPT) (echo Creating erase script & (echo r& echo h& echo erase& echo r& echo q) > $(JLINK_FOLDER)/$(ERASE_SCRIPT)) else (echo Erase script exists)
+	JLink.exe -device $(CHIP) -if SWD -speed 4000 -autoconnect 1 -CommandFile $(JLINK_FOLDER)/$(ERASE_SCRIPT)
+	
+
+#######################################
+# REMOVE BUILD FOLDER & OTHER STUFF
+#######################################
+
+clean:
+	if exist $(BUILD_FOLDER) (echo Deleting build directory & rmdir /s /q $(BUILD_FOLDER))
+	if exist $(JLINK_FOLDER)\$(FLASH_SCRIPT) (echo Deleting flash script & del $(JLINK_FOLDER)\$(FLASH_SCRIPT))
+	if exist $(JLINK_FOLDER)\$(ERASE_SCRIPT) (echo Deleting erase script & del $(JLINK_FOLDER)\$(ERASE_SCRIPT))
+
+
+
+-include $(wildcard $(BUILD_FOLDER)/*.d)
