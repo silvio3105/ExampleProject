@@ -243,7 +243,7 @@ BIN = $(CP) -O binary -S
 
 CAL_FLAGS = -mcpu=$(CPU_CORE) -mthumb $(FPU) $(FLOAT-ABI)
 COMPILER_FLAGS += $(CAL_FLAGS) $(DEFINES) $(INCLUDE_PATHS) $(OPT) -MMD -MP -MF"$(@:%.o=%.d)" -Wall -Wdouble-promotion -Wshadow -Wformat=2 -Wformat-overflow -Wformat-truncation -fdata-sections -ffunction-sections
-LINKER_FLAGS = $(CAL_FLAGS) -specs=nano.specs -TLinker/$(LDSCRIPT) -lc -lm -lnosys -Wl,-Map=$(BUILD_FOLDER)/$(HW_VER).map,--cref,--gc-sections,--print-memory-usage
+LINKER_FLAGS = $(CAL_FLAGS) -specs=nano.specs -TLinker/$(LDSCRIPT) -lc -lm -lnosys -Wl,-Map=$(BUILD_FOLDER)/$(HW_VER).map,--cref,--gc-sections,--print-memory-usage,--fuse-ld=gold
 
 ifeq ($(GPP), 1)
 ifeq ($(RTTI), 0)
