@@ -25,6 +25,7 @@
 
 // ----- INCLUDE FILES
 #include 			"Main.hpp"
+#include			"SML.hpp"
 
 #include			<cmsis_os2.h>
 
