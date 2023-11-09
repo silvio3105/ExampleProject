@@ -63,7 +63,7 @@ RELEASE_DEBUG_LEVEL = 2
 ######################################
 
 # BUILD FOR HARDWARE VERSION
-HW_VER = HW_Template
+HW_VER = BluePill
 
 # CHIP (FOR J-LINK)
 CHIP = STM32F103C8
