@@ -9,7 +9,7 @@
 			"request": "launch",
 			"name": "J-Link Debugger",
 			"cwd": "${workspaceRoot}",
-			"executable": ".builds/HW_Template.elf",
+			"executable": ".builds/HW_Template/HW_Template.elf",
 			"serverpath": "C:/Development Tools/JLink/JLinkGDBServerCL.exe", 
 			"servertype": "jlink",
 			"device": "STM32F103C8",

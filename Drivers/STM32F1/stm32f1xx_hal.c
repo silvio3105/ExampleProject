@@ -166,6 +166,11 @@ HAL_StatusTypeDef HAL_Init(void)
   return HAL_OK;
 }
 
+void SysTick_Handler(void)
+{
+	HAL_IncTick();
+}
+
 /**
   * @brief This function de-Initializes common part of the HAL and stops the systick.
   *        of time base.
