@@ -28,7 +28,7 @@ PRINT_VER = 0
 STACK_ANALYSIS = 0
 
 # WARN IF STACKOVERFLOW MIGHT HAPPEND. SET TO 0 TO DISABLE WARNING
-STACK_OVERFLOW = 256
+STACK_OVERFLOW = 0
 
 # GENERATE RUNTIME TYPE IDENTIFICATION INFORMATION
 RTTI = 0
@@ -38,6 +38,24 @@ EXCEPTIONS = 0
 
 # USE DEFAULT LIB
 DEF_LIB = 0
+
+
+######################################
+# DEBUG CONFIG
+# LEVELS: 0 = VERBOSE ; 1 = INFO ; 2 = WARNING ; 3 = ERROR
+######################################
+
+# FUNCTION NAME FOR HANDLING DEBUG PRINTS
+DEBUG_HANDLER=log
+
+# DEBUG LEVEL FOR NON-RELEASE BUILD
+DEBUG_DEBUG_LEVEL = 0
+
+# USE DEBUG IN RELEASE BUILD
+DEBUG_RELEASE = 0
+
+# DEBUG LEVEL FOR RELEASE BUILD
+RELEASE_DEBUG_LEVEL = 2
 
 
 ######################################
@@ -53,7 +71,7 @@ CHIP = STM32F103C8
 # COMPILER DEFINE FOR MCU
 MCU_DEFINE = STM32F103xB
 
-# START ADDRESS FOR .bin FILE
+# START ADDRESS FOR .bin FILE (FOR J-LINK)
 ADDR = 0x08000000
 
 # CPU CORE
@@ -116,6 +134,7 @@ Drivers/STM32F1/stm32f1xx_hal_flash_ex.c \
 Drivers/STM32F1/stm32f1xx_hal_exti.c \
 
 
+
 # C++ UNITS
 CPP_SOURCES =  \
 Main.cpp \
@@ -139,6 +158,7 @@ INCLUDE_PATHS =  \
 -ICMSIS/Core \
 -IMCU/Inc \
 -IDrivers/STM32F1/Inc \
+-IDrivers/STM32F1/Inc/Legacy
 
 
 ######################################
@@ -199,24 +219,29 @@ endif
 # OPTIMIZATION
 #######################################
 
+# NON RELEASE BUILD
 ifeq ($(RELEASE), 0)
-DEFINES += -DDEBUG
+DEFINES += -DDEBUG -DDEBUG_HANDLER=$(DEBUG_HANDLER) -DDEBUG_LEVEL=$(DEBUG_DEBUG_LEVEL)
 OPT += -Og
-else ifeq ($(SIZE), 1)
-OPT += -Os
-else
-OPT += -Ofast
-endif
-
-ifeq ($(RELEASE), 0)
+COMPILER_FLAGS += -ggdb
 ifeq ($(USE_G3), 1)
 COMPILER_FLAGS += -g3
 else
 COMPILER_FLAGS += -g
 endif
-COMPILER_FLAGS += -gdwarf-2
-else ifeq ($(FLTO), 1)
+else
+# RELEASE BUILD
+ifeq ($(DEBUG_RELEASE), 1)
+DEFINES += -DDEBUG -DDEBUG_HANDLER=$(DEBUG_HANDLER) -DDEBUG_LEVEL=$(RELEASE_DEBUG_LEVEL)
+endif
+ifeq ($(SIZE), 1)
+OPT += -Os
+else
+OPT += -Ofast
+endif
+ifeq ($(FLTO), 1)
 COMPILER_FLAGS += -flto
+endif
 endif
 
 
