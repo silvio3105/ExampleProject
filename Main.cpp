@@ -46,8 +46,8 @@ static void Error_Handler(void);
 
 
 // ----- STATIC FUNCTION DECLARATIONS
-SML_PRINT_HANDLER(uartOut);
-SML_COPY_HANDLER(copyHandler);
+__SML_PRINT_HANDLER(uartOut);
+__SML_COPY_HANDLER(copyHandler);
 
 
 // ----- VARIABLES
@@ -55,39 +55,6 @@ SML::Logger<256> Serial = SML::Logger<256>(uartOut);
 SML::Logger<128> Log = SML::Logger<128>(uartOut, "[LOGGER] ");
 SML::Copier Copy = SML::Copier(copyHandler);
 
-
-// ----- DEBUG STUFF
-#if defined(DEBUG_EXAMPLE) && defined(DEBUG) && defined(DEBUG_HANDLER)
-	void DEBUG_HANDLER(const char* str, ...);
-
-	#if DEBUG_LEVEL <= 3
-		#define __EXAMPLE_ERROR_LOG DEBUG_HANDLER
-	#else
-		#define __EXAMPLE_ERROR_LOG(...)
-	#endif
-	#if DEBUG_LEVEL <= 2
-		#define __EXAMPLE_WARNING_LOG DEBUG_HANDLER
-	#else
-		#define __EXAMPLE_WARNING_LOG(...)
-	#endif
-	#if DEBUG_LEVEL <= 1
-		#define __EXAMPLE_INFO_LOG DEBUG_HANDLER
-	#else
-		#define __EXAMPLE_INFO_LOG(...)
-	#endif
-	#if DEBUG_LEVEL == 0
-		#define __EXAMPLE_VERBOSE_LOG DEBUG_HANDLER
-	#else
-		#define __EXAMPLE_VERBOSE_LOG(...)
-	#endif
-#else 
-	#define __EXAMPLE_ERROR_LOG(...)
-	#define __EXAMPLE_WARNING_LOG(...)
-	#define __EXAMPLE_INFO_LOG(...)
-	#define __EXAMPLE_VERBOSE_LOG(...)
-#endif
-
-__SML_DEBUG_HANDLER(Serial)
 
 // ----- APPLICATION ENTRY
 int main(void)
@@ -102,13 +69,8 @@ int main(void)
 
 	Serial.print("Simple Miscellaneous Library(SML) example\n\n");
 
-	__EXAMPLE_ERROR_LOG("This is debug error log\n");
-	__EXAMPLE_WARNING_LOG("This is debug warning log\n");
-	__EXAMPLE_INFO_LOG("This is debug info log\n");
-	__EXAMPLE_VERBOSE_LOG("This is debug verbose log\n");
-
 	// LOGGER
-	Log.print("Example uses built-in logger object.\n", 37);
+	Log.print("Example uses built-in logger object.\n");
 	Log.printf("Logger state is: %s\n", Serial.getState() == SML::State_t::On ? "on" : "off");
 	Log.setState(SML::State_t::Off);
 	Log.print("This will not be printed!\n");
@@ -159,6 +121,13 @@ int main(void)
 
 	// COUNT
 	Serial.printf("number of Ls in string: %u\nnumber of Ls in string before space: %u\n", SML::count(str, 'l'), SML::count(str, 'l', ' '));
+
+	char caseStr[] = "TesT-123";
+	Serial.printf("Original %s\n", caseStr);
+	SML::toUppercase(caseStr);
+	Serial.printf("After toUpper: %s\n", caseStr);
+	SML::toLowercase(caseStr);
+	Serial.printf("After toLower: %s\n", caseStr);
 
 	// TOKENIZE
 	str1 = SML::tok(str, ' ');
@@ -320,13 +289,13 @@ int main(void)
 }
 
 // ----- STATIC FUNCTION DEFINITIONS
-SML_PRINT_HANDLER(uartOut)
+__SML_PRINT_HANDLER(uartOut)
 {
 	HAL_UART_Transmit(&huart1, (uint8_t*)&buffer[0], len, 500);
 	Serial.done();
 }
 
-SML_COPY_HANDLER(copyHandler)
+__SML_COPY_HANDLER(copyHandler)
 {
 	SML::copy(source, destination, len);
 	return SML::Return_t::Ok;

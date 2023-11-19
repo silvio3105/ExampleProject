@@ -4,7 +4,7 @@
 ######################################
 
 # RELEASE BUILD
-RELEASE = 0
+RELEASE = 1
 
 # OPT FLAG FOR SIZE
 SIZE = 0
@@ -55,7 +55,7 @@ DEBUG_DEBUG_LEVEL = 0
 DEBUG_RELEASE = 1
 
 # DEBUG LEVEL FOR RELEASE BUILD
-RELEASE_DEBUG_LEVEL = 2
+RELEASE_DEBUG_LEVEL = 0
 
 
 ######################################
