@@ -25,81 +25,25 @@
 
 // ----- INCLUDE FILES
 #include 			"Main.hpp"
+#include			"sBuildInfo.h"
 
-#include			<cmsis_os2.h>
-
-
-// ----- DEFINES
-
-
-// ----- MACRO FUNCTIONS
-
-
-// ----- TYPEDEFS
-
-
-// ----- ENUMS
-
-
-// ----- STRUCTS
-
-
-// ----- CLASSES	
-
-
-// ----- VARIABLES
+// Build info (will be placed at 0x10C, right after vector table)
+__SBI("SBI_FW", "v1.13.08rc5", "BluePill", "E");
 
 
 // ----- STATIC FUNCTION DECLARATIONS
 static void sysClockInit(void);
 
-// ----- FUNCTION DEFINITIONS
-osThreadId_t task;
-void thread1(void *argument);
 
-void thread1(void *argument) 
-{
-	while (1)
-	{
-		osDelay(400);	
-		HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, GPIO_PIN_SET);
-	}
-
-}
-
-osThreadId_t task2;
-void thread2(void *argument);
-
-void thread2(void *argument) 
-{
-	while (1)
-	{
-		osDelay(750);
-		HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, GPIO_PIN_RESET);
-	}
-
-}
-
+// ----- APP ENTRY
 int main(void)
 {
-	GPIO_InitTypeDef gpioInit;
-
 	HAL_Init();
 	sysClockInit();
 
-	__HAL_RCC_GPIOC_CLK_ENABLE();
-	gpioInit.Pin = GPIO_PIN_13;
-	gpioInit.Mode = GPIO_MODE_OUTPUT_PP;
-	gpioInit.Pull = GPIO_NOPULL;
-	gpioInit.Speed = GPIO_SPEED_FREQ_LOW;
-	HAL_GPIO_Init(GPIOC, &gpioInit);
+	// Just to make sure compiler does not remove build info
+	SBI_USED;
 
-	osKernelInitialize();
-	task = osThreadNew(thread1, NULL, NULL);
-	task2 = osThreadNew(thread2, NULL, NULL);
-	
-	while (osKernelGetState() != osKernelReady);
-	osKernelStart();
 
 	while (1);
 }
