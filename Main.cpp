@@ -44,6 +44,8 @@ int main(void)
 	// Just to make sure compiler does not remove build info
 	SBI_USED;
 
+	// Print example:
+	// printf("FW version %s\nBuild date %s\n", SBI_VER, SBI_DATE);
 
 	while (1);
 }
