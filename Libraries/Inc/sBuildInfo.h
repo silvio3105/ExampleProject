@@ -164,14 +164,14 @@ This License shall be included in all methodal textual files.
 #endif // SBI_NO_FIX
 
 
-#define __SBI_NAME()			__buildInfo.app.name /**< @brief Function-like macro for application name. */
-#define __SBI_TAG()				__buildInfo.app.tag /**< @brief Function-like macro for application tag. */
-#define __SBI_VARIANT()			__buildInfo.app.variant /**< @brief Function-like macro for application variant. */
-#define __SBI_VER()				__buildInfo.appVer /**< @brief Function-like macro for application version. */
-#define __SBI_HW()				__buildInfo.hwRev /**< @brief Function-like macro for application hardware revision. */
-#define __SBI_DATE()			__buildInfo.buildDate /**< @brief Function-like macro for application build date. Example date: \c Aug \c  8 \c 2019 (day is padded). */
-#define __SBI_FLAGS()			__buildInfo.buildFlags /**< @brief Function-like macro for application build flags. Example: \c D flag for debug build. */
-#define __SBI_USED				(void)(__SBI_NAME()) /**< @brief Code snippet for preventing compiler from removing build info from flash memory. */
+#define SBI_NAME				__buildInfo.app.name /**< @brief Macro for application name. */
+#define SBI_TAG					__buildInfo.app.tag /**< @brief Macro for application tag. */
+#define SBI_VARIANT				__buildInfo.app.variant /**< @brief Macro for application variant. */
+#define SBI_VER					__buildInfo.appVer /**< @brief Macro for application version. */
+#define SBI_HW					__buildInfo.hwRev /**< @brief Macro for application hardware revision. */
+#define SBI_DATE				__buildInfo.buildDate /**< @brief Macro for application build date. Example date: \c Aug \c  8 \c 2019 (day is padded). */
+#define SBI_FLAGS				__buildInfo.buildFlags /**< @brief Macro for application build flags. Example: \c D flag for debug build. */
+#define SBI_USED				(void)(SBI_NAME) /**< @brief Code snippet for preventing compiler from removing build info from flash memory. */
 
 
 // ----- STRUCTS
