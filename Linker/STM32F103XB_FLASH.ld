@@ -56,6 +56,13 @@ SECTIONS
     . = ALIGN(4);
   } >FLASH
 
+  .sBuildInfo :
+  {
+    . = ALIGN(4);
+    KEEP(*(.sBuildInfo)) /* Build info */
+    . = ALIGN(4);
+  } >FLASH
+
   /* The program code and other data goes into FLASH */
   .text :
   {
